@@ -1,3 +1,6 @@
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+
 local repo = 'https://raw.githubusercontent.com/violin-suzutsuki/LinoriaLib/main/'
 
 local Library = loadstring(game:HttpGet(repo .. 'Library.lua'))()
@@ -12,7 +15,6 @@ local Window = Library:CreateWindow({
     MenuFadeTime = 0.2
 })
 
--- TABY
 local Tabs = {
     ['.Lua'] = Window:AddTab('.Lua'),
     ['Settings'] = Window:AddTab('Settings'),
@@ -54,7 +56,6 @@ StatusLabel.TextColor3 = Color3.fromRGB(255,255,255)
 StatusLabel.Text = "X: OFF"
 StatusLabel.Parent = Frame
 
-
 local MainGroup = Tabs['.Lua']:AddLeftGroupbox('Main')
 
 local BetterVD = MainGroup:AddToggle('BetterVD', {
@@ -78,8 +79,6 @@ local Slider2 = MainGroup:AddSlider('Position', {
     Rounding = 0,
 })
 
-
-
 local SlidersUnlocked = false
 
 BetterVD:OnChanged(function(val)
@@ -99,15 +98,16 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
     end
 end)
 
-
+-- 📍 POSITION DISPLAY (SAFE)
 task.spawn(function()
     while true do
         task.wait(0.1)
 
         local char = LocalPlayer.Character
-        if char and char:FindFirstChild("HumanoidRootPart") then
-            local pos = char.HumanoidRootPart.Position
+        local hrp = char and char:FindFirstChild("HumanoidRootPart")
 
+        if hrp then
+            local pos = hrp.Position
             local posValue = Slider2.Value
             local posText = posValue == 101 and "INF" or tostring(posValue)
 
@@ -119,8 +119,7 @@ task.spawn(function()
     end
 end)
 
-
-
+-- 🚀 MOVEMENT (ANTI-CRASH)
 task.spawn(function()
     local t = 0
     local currentDistance = 50000
@@ -134,44 +133,32 @@ task.spawn(function()
         end
 
         local char = LocalPlayer.Character
-        if not char then continue end
+        if not char or not char.Parent then continue end
 
         local hrp = char:FindFirstChild("HumanoidRootPart")
-        if not hrp then continue end
+        if not hrp or not hrp:IsDescendantOf(game) then continue end
 
         local val = Slider2.Value
 
-        
+        -- 🔥 FIX: NORMAL DISTANCE
         if val == 101 then
-            targetDistance = math.random(10000000000, 51000000000) -- 10B → 51B
+            targetDistance = math.random(20000, 80000)
         else
             local base = val * 1000
             targetDistance = base + math.random(0, 9000)
         end
 
-        
         currentDistance = currentDistance + (targetDistance - currentDistance) * 0.05
 
-        
         local speed = Slider1.Value / 1000
         t = t + speed
 
-       
         local x = math.cos(t) * currentDistance
         local y = math.sin(t * 0.7) * (currentDistance / 2)
         local z = math.sin(t) * currentDistance
 
         hrp.CFrame = CFrame.new(x, y, z)
     end
-end)
-
-
-Slider1:OnChanged(function(val)
-    if not BetterVD.Value or not SlidersUnlocked then return end
-end)
-
-Slider2:OnChanged(function(val)
-    if not BetterVD.Value or not SlidersUnlocked then return end
 end)
 
 -- SETTINGS
@@ -187,7 +174,6 @@ MenuGroup:AddLabel('Menu bind'):AddKeyPicker('MenuKeybind', {
 
 Library.ToggleKeybind = Options.MenuKeybind
 
--- MANAGERY
 ThemeManager:SetLibrary(Library)
 SaveManager:SetLibrary(Library)
 
@@ -197,7 +183,6 @@ SaveManager:SetIgnoreIndexes({ 'MenuKeybind' })
 ThemeManager:SetFolder('Sl1wed')
 SaveManager:SetFolder('Sl1wed/configs')
 
--- CONFIG + THEME w Settings
 SaveManager:BuildConfigSection(Tabs['Settings'])
 ThemeManager:ApplyToTab(Tabs['Settings'])
 
