@@ -140,9 +140,8 @@ task.spawn(function()
 
         local val = Slider2.Value
 
-        -- 🔥 FIX: NORMAL DISTANCE
         if val == 101 then
-            targetDistance = math.random(20000, 80000)
+            targetDistance = math.random(10000000000, 51000000000) -- 10B → 51B
         else
             local base = val * 1000
             targetDistance = base + math.random(0, 9000)
