@@ -202,4 +202,3 @@ SaveManager:BuildConfigSection(Tabs['Settings'])
 ThemeManager:ApplyToTab(Tabs['Settings'])
 
 SaveManager:LoadAutoloadConfig()
-message.txt
